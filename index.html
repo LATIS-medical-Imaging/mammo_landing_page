@@ -2,3790 +2,792 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <title>PTM — Medical AI Platform for Mammography</title>
+    <meta name="description" content="PTM turns medical imaging research into production-grade AI software: a medical SaaS for microcalcification detection, open-source tooling and DICOM developer tools. Built at LATIS, Sousse University.">
 
-    <meta name="description"
-          content="PTM is an open medical AI research and engineering platform for reproducible medical imaging research, AI model development, DICOM processing and clinical research applications.">
+    <!-- Social / link previews (used when the page is shared with collaborators) -->
+    <meta property="og:title" content="PTM — Medical AI Platform for Mammography">
+    <meta property="og:description" content="From the lab to production: medical imaging AI engineered for real-world deployment.">
+    <meta property="og:image" content="logo.png">
+    <meta property="og:type" content="website">
 
-    <title>PTM — Medical AI Research Platform</title>
-
-    <link rel="icon" type="image/x-icon" href="logo.png">
+    <link rel="icon" type="image/png" href="logo.png">
 
     <style>
+        /* ================= RESET ================= */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-        /* ============================================================
-           RESET
-        ============================================================ */
-
-        *,
-        *::before,
-        *::after {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-
-        /* ============================================================
-           DESIGN TOKENS
-        ============================================================ */
-
+        /* ================= TOKENS ================= */
         :root {
-
             --primary: #c2185b;
             --primary-dark: #8f1244;
-            --primary-light: #fce4ec;
+            --primary-soft: rgba(194, 24, 91, 0.08);
+            --primary-line: rgba(194, 24, 91, 0.18);
+            --accent-on-dark: #ff8fbd;
 
             --dark: #24171c;
-            --dark-soft: #35252b;
+            --dark-2: #2f1f25;
 
-            --background: #f9f7f8;
+            --bg: #f9f7f8;
             --surface: #ffffff;
-
             --border: #eadfe3;
 
             --text: #24171c;
             --muted: #6e5d64;
 
-            --gradient:
-                linear-gradient(
-                    135deg,
-                    #c2185b,
-                    #8f1244
-                );
+            --gradient: linear-gradient(135deg, #c2185b, #8f1244);
 
-            --shadow-sm:
-                0 6px 20px rgba(36, 23, 28, 0.06);
+            --shadow-sm: 0 6px 20px rgba(36, 23, 28, 0.06);
+            --shadow-md: 0 16px 50px rgba(36, 23, 28, 0.10);
+            --shadow-lg: 0 25px 80px rgba(36, 23, 28, 0.16);
 
-            --shadow-md:
-                0 16px 50px rgba(36, 23, 28, 0.10);
-
-            --shadow-lg:
-                0 25px 80px rgba(36, 23, 28, 0.15);
+            --radius: 16px;
+            --mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
         }
 
-
-        /* ============================================================
-           GLOBAL
-        ============================================================ */
-
-        html {
-            scroll-behavior: smooth;
-        }
-
+        /* ================= GLOBAL ================= */
+        html { scroll-behavior: smooth; scroll-padding-top: 100px; }
 
         body {
-
-            font-family:
-                "Segoe UI",
-                Inter,
-                system-ui,
-                -apple-system,
-                BlinkMacSystemFont,
-                sans-serif;
-
+            font-family: "Segoe UI", Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
             color: var(--text);
-            background: var(--background);
-
+            background: var(--bg);
             line-height: 1.65;
-
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
+        a { color: inherit; }
+        img { max-width: 100%; display: block; }
 
-        a {
-            color: inherit;
+        section { padding: 6.5rem 2rem; }
+        .container { max-width: 1180px; margin: 0 auto; }
+
+        /* ================= SCROLL ANIMATION ================= */
+        .animate { opacity: 0; transform: translateY(30px); transition: opacity .7s ease, transform .7s ease; }
+        .animate.visible { opacity: 1; transform: none; }
+        @media (prefers-reduced-motion: reduce) {
+            .animate { opacity: 1; transform: none; transition: none; }
+            html { scroll-behavior: auto; }
         }
 
-
-        section {
-            padding: 6rem 2rem;
-        }
-
-
-        .container {
-
-            max-width: 1180px;
-
-            margin:
-                0 auto;
-        }
-
-
-        /* ============================================================
-           SCROLL ANIMATION
-        ============================================================ */
-
-        .animate {
-
-            opacity: 0;
-
-            transform:
-                translateY(35px);
-
-            transition:
-
-                opacity 0.7s ease,
-
-                transform 0.7s ease;
-        }
-
-
-        .animate.visible {
-
-            opacity: 1;
-
-            transform:
-                translateY(0);
-        }
-
-
-        /* ============================================================
-           INSTITUTION BAR
-        ============================================================ */
-
+        /* ================= INSTITUTION BAR ================= */
         .institution-bar {
-
-            position: fixed;
-
-            top: 0;
-
-            left: 0;
-
-            right: 0;
-
-            z-index: 1000;
-
-            text-align: center;
-
-            padding: 0.55rem 1rem;
-
-            background: var(--dark);
-
-            color:
-                rgba(
-                    255,
-                    255,
-                    255,
-                    0.85
-                );
-
-            font-size: 0.78rem;
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            height: 32px; display: flex; align-items: center; justify-content: center;
+            padding: 0 1rem; background: var(--dark);
+            color: rgba(255,255,255,.8); font-size: .78rem; text-align: center;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
+        .institution-bar a { color: #fff; text-decoration: none; font-weight: 600; }
+        .institution-bar a:hover { text-decoration: underline; }
 
-
-        .institution-bar a {
-
-            color: #ffffff;
-
-            text-decoration: none;
-
-            font-weight: 600;
-        }
-
-
-        /* ============================================================
-           NAVBAR
-        ============================================================ */
-
+        /* ================= NAV ================= */
         nav {
-
-            position: fixed;
-
-            top: 31px;
-
-            left: 0;
-
-            right: 0;
-
-            z-index: 999;
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: space-between;
-
-            padding:
-
-                0.85rem
-
-                3rem;
-
-            background:
-                rgba(
-                    255,
-                    255,
-                    255,
-                    0.94
-                );
-
-            backdrop-filter:
-                blur(14px);
-
-            border-bottom:
-
-                1px solid
-
-                rgba(
-                    0,
-                    0,
-                    0,
-                    0.05
-                );
+            position: fixed; top: 32px; left: 0; right: 0; z-index: 999;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: .8rem 3rem;
+            background: rgba(255,255,255,.94);
+            backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(0,0,0,.05);
         }
+        .brand { display: flex; align-items: center; gap: .75rem; text-decoration: none; }
+        .brand img { height: 42px; width: auto; }
+        .brand-text { display: flex; flex-direction: column; line-height: 1.1; }
+        .brand-name { color: var(--primary); font-size: 1.15rem; font-weight: 800; }
+        .brand-subtitle { font-size: .68rem; color: var(--muted); letter-spacing: .5px; text-transform: uppercase; margin-top: .2rem; }
 
+        .nav-center { display: flex; align-items: center; gap: 1.6rem; }
+        .nav-center a { text-decoration: none; color: var(--muted); font-size: .88rem; font-weight: 600; transition: color .25s; }
+        .nav-center a:hover { color: var(--primary); }
+        .nav-actions { display: flex; gap: .6rem; }
 
-        .brand {
-
-            display: flex;
-
-            align-items: center;
-
-            gap: 0.75rem;
-
-            text-decoration: none;
-        }
-
-
-        .brand img {
-
-            height: 42px;
-
-            width: auto;
-        }
-
-
-        .brand-text {
-
-            display: flex;
-
-            flex-direction: column;
-
-            line-height: 1.1;
-        }
-
-
-        .brand-name {
-
-            color: var(--primary);
-
-            font-size: 1.15rem;
-
-            font-weight: 800;
-        }
-
-
-        .brand-subtitle {
-
-            font-size: 0.68rem;
-
-            color: var(--muted);
-
-            letter-spacing: 0.5px;
-
-            text-transform: uppercase;
-
-            margin-top: 0.2rem;
-        }
-
-
-        .nav-center {
-
-            display: flex;
-
-            align-items: center;
-
-            gap: 1.4rem;
-        }
-
-
-        .nav-center a {
-
-            text-decoration: none;
-
-            color: var(--muted);
-
-            font-size: 0.88rem;
-
-            font-weight: 600;
-
-            transition:
-                color 0.25s ease;
-        }
-
-
-        .nav-center a:hover {
-
-            color: var(--primary);
-        }
-
-
-        .nav-actions {
-
-            display: flex;
-
-            gap: 0.7rem;
-        }
-
-
-        /* ============================================================
-           BUTTONS
-        ============================================================ */
-
+        /* ================= BUTTONS ================= */
         .btn {
-
-            display:
-                inline-flex;
-
-            align-items:
-                center;
-
-            justify-content:
-                center;
-
-            text-decoration:
-                none;
-
-            border:
-                none;
-
-            border-radius:
-                8px;
-
-            padding:
-
-                0.7rem
-
-                1.25rem;
-
-            font-size:
-                0.88rem;
-
-            font-weight:
-                700;
-
-            cursor:
-                pointer;
-
-            transition:
-                all 0.25s ease;
+            display: inline-flex; align-items: center; justify-content: center; gap: .45rem;
+            text-decoration: none; border: none; border-radius: 9px;
+            padding: .72rem 1.3rem; font-size: .88rem; font-weight: 700; font-family: inherit;
+            cursor: pointer; transition: all .25s ease; white-space: nowrap;
         }
+        .btn-primary { background: var(--gradient); color: #fff; box-shadow: 0 8px 22px rgba(194,24,91,.22); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(194,24,91,.35); }
+        .btn-outline { color: var(--primary); border: 1.5px solid var(--primary); background: transparent; }
+        .btn-outline:hover { background: var(--primary); color: #fff; transform: translateY(-2px); }
+        .btn-white { background: #fff; color: var(--primary); }
+        .btn-white:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0,0,0,.18); }
+        .btn-ghost-white { color: #fff; border: 1.5px solid rgba(255,255,255,.7); background: transparent; }
+        .btn-ghost-white:hover { background: #fff; color: var(--primary); }
+        .btn-lg { padding: .9rem 1.6rem; font-size: .95rem; }
+        .arrow { transition: transform .25s; }
+        .btn:hover .arrow { transform: translateX(3px); }
 
-
-        .btn-primary {
-
-            background:
-                var(--gradient);
-
-            color:
-                white;
-
-            box-shadow:
-
-                0 8px 22px
-
-                rgba(
-                    194,
-                    24,
-                    91,
-                    0.22
-                );
+        /* ================= SECTION HEADERS ================= */
+        .section-label {
+            display: inline-block; color: var(--primary);
+            font-size: .76rem; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase;
+            margin-bottom: .8rem;
         }
+        .section-title { font-size: clamp(2rem, 4vw, 2.9rem); line-height: 1.18; letter-spacing: -.5px; margin-bottom: 1rem; }
+        .section-description { max-width: 720px; color: var(--muted); font-size: 1.05rem; margin-bottom: 3.2rem; }
+        .center { text-align: center; margin-left: auto; margin-right: auto; }
 
-
-        .btn-primary:hover {
-
-            transform:
-                translateY(-2px);
-
-            box-shadow:
-
-                0 12px 30px
-
-                rgba(
-                    194,
-                    24,
-                    91,
-                    0.35
-                );
-        }
-
-
-        .btn-outline {
-
-            color:
-                var(--primary);
-
-            border:
-
-                1.5px solid
-
-                var(--primary);
-
-            background:
-                transparent;
-        }
-
-
-        .btn-outline:hover {
-
-            background:
-                var(--primary);
-
-            color:
-                white;
-
-            transform:
-                translateY(-2px);
-        }
-
-
-        /* ============================================================
-           HERO
-        ============================================================ */
-
-        .hero {
-
-            min-height:
-                100vh;
-
-            display:
-                flex;
-
-            align-items:
-                center;
-
-            position:
-                relative;
-
-            overflow:
-                hidden;
-        }
-
-
-        .hero-background {
-
-            position:
-                absolute;
-
-            inset: 0;
-
-            background:
-
-                url("background.png")
-
-                center / cover
-
-                no-repeat;
-        }
-
-
+        /* ================= HERO ================= */
+        .hero { min-height: 100vh; display: flex; align-items: center; position: relative; overflow: hidden; padding: 0 2rem; }
+        .hero-background { position: absolute; inset: 0; background: url("background.png") center / cover no-repeat; }
         .hero-background::after {
-
-            content:
-                "";
-
-            position:
-                absolute;
-
-            inset:
-                0;
-
-            background:
-
-                linear-gradient(
-
-                    90deg,
-
-                    rgba(
-                        249,
-                        247,
-                        248,
-                        0.97
-                    ) 0%,
-
-                    rgba(
-                        249,
-                        247,
-                        248,
-                        0.90
-                    ) 48%,
-
-                    rgba(
-                        194,
-                        24,
-                        91,
-                        0.18
-                    ) 100%
-                );
+            content: ""; position: absolute; inset: 0;
+            background: linear-gradient(90deg,
+                rgba(249,247,248,.97) 0%,
+                rgba(249,247,248,.90) 50%,
+                rgba(194,24,91,.18) 100%);
         }
-
-
-        .hero-content {
-
-            position:
-                relative;
-
-            z-index:
-                2;
-
-            width:
-                100%;
-
-            max-width:
-                1180px;
-
-            margin:
-                0 auto;
-
-            padding:
-
-                9rem
-
-                2rem
-
-                5rem;
-        }
-
+        .hero-content { position: relative; z-index: 2; width: 100%; max-width: 1180px; margin: 0 auto; padding: 10rem 0 4.5rem; }
 
         .hero-label {
-
-            display:
-                inline-flex;
-
-            align-items:
-                center;
-
-            gap:
-                0.5rem;
-
-            padding:
-
-                0.4rem
-
-                0.9rem;
-
-            background:
-
-                rgba(
-                    194,
-                    24,
-                    91,
-                    0.1
-                );
-
-            color:
-                var(--primary);
-
-            border:
-
-                1px solid
-
-                rgba(
-                    194,
-                    24,
-                    91,
-                    0.18
-                );
-
-            border-radius:
-                50px;
-
-            font-size:
-                0.78rem;
-
-            font-weight:
-                700;
-
-            text-transform:
-                uppercase;
-
-            letter-spacing:
-                0.7px;
-
-            margin-bottom:
-                1.4rem;
+            display: inline-flex; align-items: center; gap: .55rem;
+            padding: .4rem .95rem; background: var(--primary-soft); color: var(--primary);
+            border: 1px solid var(--primary-line); border-radius: 50px;
+            font-size: .76rem; font-weight: 700; text-transform: uppercase; letter-spacing: .7px;
+            margin-bottom: 1.4rem;
         }
-
+        .pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); box-shadow: 0 0 0 0 rgba(194,24,91,.5); animation: pulse 2s infinite; }
+        @keyframes pulse { 70% { box-shadow: 0 0 0 9px rgba(194,24,91,0); } 100% { box-shadow: 0 0 0 0 rgba(194,24,91,0); } }
 
         .hero h1 {
-
-            max-width:
-                850px;
-
-            font-size:
-                clamp(
-                    2.8rem,
-                    6vw,
-                    5rem
-                );
-
-            line-height:
-                1.08;
-
-            font-weight:
-                850;
-
-            letter-spacing:
-                -1.5px;
-
-            margin-bottom:
-                1.5rem;
+            max-width: 880px; font-size: clamp(2.6rem, 5.6vw, 4.6rem);
+            line-height: 1.07; font-weight: 850; letter-spacing: -1.5px; margin-bottom: 1.5rem;
         }
+        .hero h1 span { color: var(--primary); }
+        .hero-description { max-width: 680px; color: var(--muted); font-size: 1.15rem; margin-bottom: 2.1rem; }
+        .hero-buttons { display: flex; gap: .9rem; flex-wrap: wrap; margin-bottom: 3.2rem; }
 
-
-        .hero h1 span {
-
-            color:
-                var(--primary);
+        .hero-stats {
+            display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+            max-width: 900px; background: rgba(255,255,255,.82);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-sm);
         }
+        .stat { padding: 1.15rem 1.3rem; border-right: 1px solid var(--border); }
+        .stat:last-child { border-right: none; }
+        .stat strong { display: block; font-size: 1.35rem; font-weight: 800; color: var(--primary); line-height: 1.2; }
+        .stat span { font-size: .8rem; color: var(--muted); font-weight: 600; }
 
+        /* ================= RESEARCH ================= */
+        .research { background: var(--surface); }
 
-        .hero-description {
+        .research-head { display: grid; grid-template-columns: 1.15fr 1fr; gap: 4rem; align-items: start; margin-bottom: 4rem; }
+        .research-head p { color: var(--muted); margin-bottom: 1.1rem; }
+        .research-head .section-description { margin-bottom: 0; }
 
-            max-width:
-                690px;
-
-            color:
-                var(--muted);
-
-            font-size:
-                1.15rem;
-
-            margin-bottom:
-                2rem;
+        .methods { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; }
+        .method {
+            padding: 1.1rem 1.15rem; background: var(--bg);
+            border: 1px solid var(--border); border-radius: 12px;
         }
+        .method b { display: block; font-size: .92rem; margin-bottom: .2rem; }
+        .method span { font-size: .82rem; color: var(--muted); line-height: 1.45; display: block; }
 
+        /* Publications */
+        .pubs-title { display: flex; align-items: end; justify-content: space-between; gap: 1rem; margin-bottom: 1.4rem; flex-wrap: wrap; }
+        .pubs-title h3 { font-size: 1.45rem; letter-spacing: -.3px; }
+        .pubs-title p { color: var(--muted); font-size: .9rem; }
 
-        .hero-buttons {
-
-            display:
-                flex;
-
-            gap:
-                0.9rem;
-
-            flex-wrap:
-                wrap;
-
-            margin-bottom:
-                2.5rem;
+        .pub-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.2rem; margin-bottom: 4.5rem; }
+        .pub {
+            position: relative; display: flex; flex-direction: column;
+            padding: 1.6rem 1.6rem 1.4rem; text-decoration: none;
+            background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+            transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease;
+            overflow: hidden;
         }
-
-
-        .hero-meta {
-
-            display:
-                flex;
-
-            flex-wrap:
-                wrap;
-
-            gap:
-                1rem;
+        .pub::before {
+            content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+            background: var(--gradient); opacity: .9;
         }
-
-
-        .meta-item {
-
-            display:
-                flex;
-
-            align-items:
-                center;
-
-            gap:
-                0.45rem;
-
-            font-size:
-                0.82rem;
-
-            font-weight:
-                650;
-
-            color:
-                var(--dark);
+        .pub:hover { transform: translateY(-5px); box-shadow: var(--shadow-md); border-color: var(--primary-line); }
+        .pub-meta { display: flex; align-items: center; gap: .6rem; margin-bottom: .85rem; flex-wrap: wrap; }
+        .pub-venue {
+            font-size: .72rem; font-weight: 800; letter-spacing: .6px; text-transform: uppercase;
+            color: var(--primary); background: var(--primary-soft); padding: .25rem .6rem; border-radius: 6px;
         }
+        .pub-year { font-size: .78rem; font-weight: 700; color: var(--muted); }
+        .pub h4 { font-size: 1.04rem; line-height: 1.4; margin-bottom: .6rem; }
+        .pub-journal { font-size: .85rem; color: var(--muted); font-style: italic; }
+        .pub-link { margin-top: auto; padding-top: 1rem; font-size: .82rem; font-weight: 700; color: var(--primary); }
 
-
-        .meta-dot {
-
-            width:
-                8px;
-
-            height:
-                8px;
-
-            border-radius:
-                50%;
-
-            background:
-                var(--primary);
+        /* Result showcase */
+        .result {
+            display: grid; grid-template-columns: 1fr 1.3fr; gap: 3rem; align-items: center;
+            background: var(--dark); color: #fff; border-radius: 22px; padding: 2.8rem;
+            box-shadow: var(--shadow-lg);
         }
-
-
-        /* ============================================================
-           SECTION HEADERS
-        ============================================================ */
-
-        .section-label {
-
-            display:
-                inline-block;
-
-            color:
-                var(--primary);
-
-            font-size:
-                0.78rem;
-
-            font-weight:
-                800;
-
-            letter-spacing:
-                1px;
-
-            text-transform:
-                uppercase;
-
-            margin-bottom:
-                0.8rem;
+        .result .section-label { color: var(--accent-on-dark); }
+        .result h3 { font-size: 1.7rem; line-height: 1.25; margin-bottom: .9rem; }
+        .result p { color: rgba(255,255,255,.7); font-size: .95rem; margin-bottom: 1.5rem; }
+        .pipeline { list-style: none; display: grid; gap: .5rem; counter-reset: step; }
+        .pipeline li {
+            counter-increment: step; display: flex; align-items: center; gap: .75rem;
+            font-size: .88rem; font-weight: 600; color: rgba(255,255,255,.88);
         }
-
-
-        .section-title {
-
-            font-size:
-                clamp(
-                    2rem,
-                    4vw,
-                    3rem
-                );
-
-            line-height:
-                1.2;
-
-            margin-bottom:
-                1rem;
+        .pipeline li::before {
+            content: counter(step, decimal-leading-zero);
+            font-size: .7rem; font-weight: 800; color: var(--accent-on-dark);
+            border: 1px solid rgba(255,143,189,.35); border-radius: 6px; padding: .15rem .4rem;
         }
+        .result-images { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .result-images figure { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); border-radius: 14px; overflow: hidden; }
+        .result-images img { width: 100%; aspect-ratio: 1; object-fit: cover; }
+        .result-images figcaption { padding: .75rem; text-align: center; font-size: .8rem; font-weight: 700; color: rgba(255,255,255,.8); }
 
-
-        .section-description {
-
-            max-width:
-                720px;
-
-            color:
-                var(--muted);
-
-            font-size:
-                1.05rem;
-
-            margin-bottom:
-                3.5rem;
+        /* ================= MAMMODETECT AI ================= */
+        .platform { background: var(--bg); }
+        .platform-card {
+            display: grid; grid-template-columns: 1.05fr 1fr; gap: 0;
+            background: var(--surface); border: 1px solid var(--border); border-radius: 22px;
+            overflow: hidden; box-shadow: var(--shadow-md);
         }
-
-
-        .center {
-
-            text-align:
-                center;
-
-            margin-left:
-                auto;
-
-            margin-right:
-                auto;
+        .platform-main { padding: 3rem; }
+        .badge-row { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1.2rem; }
+        .badge {
+            font-size: .72rem; font-weight: 800; letter-spacing: .5px; text-transform: uppercase;
+            padding: .3rem .65rem; border-radius: 6px; background: var(--primary-soft); color: var(--primary);
         }
+        .badge.dark { background: var(--dark); color: #fff; }
+        .platform-main h2 { font-size: clamp(1.9rem, 3.4vw, 2.5rem); line-height: 1.15; letter-spacing: -.5px; margin-bottom: 1rem; }
+        .platform-main > p { color: var(--muted); margin-bottom: 1.8rem; }
+        .platform-buttons { display: flex; gap: .8rem; flex-wrap: wrap; }
+        .url { display: block; margin-top: 1.1rem; font-family: var(--mono); font-size: .8rem; color: var(--muted); }
 
-
-        /* ============================================================
-           WHAT IS PTM
-        ============================================================ */
-
-        .intro {
-
-            background:
-                var(--surface);
+        .platform-modules { background: var(--gradient); color: #fff; padding: 3rem; display: flex; flex-direction: column; justify-content: center; }
+        .platform-modules h3 { font-size: .78rem; letter-spacing: 1.2px; text-transform: uppercase; color: rgba(255,255,255,.75); margin-bottom: 1.2rem; }
+        .module-list { display: grid; gap: .7rem; }
+        .module {
+            display: flex; gap: .9rem; align-items: flex-start;
+            padding: .95rem 1rem; background: rgba(255,255,255,.12);
+            border: 1px solid rgba(255,255,255,.16); border-radius: 12px;
         }
-
-
-        .intro-grid {
-
-            display:
-                grid;
-
-            grid-template-columns:
-
-                1.1fr
-
-                1fr;
-
-            gap:
-                4rem;
-
-            align-items:
-                center;
+        .module-icon {
+            flex: 0 0 38px; height: 38px; display: flex; align-items: center; justify-content: center;
+            background: #fff; color: var(--primary); border-radius: 9px; font-size: .72rem; font-weight: 800;
         }
+        .module b { display: block; font-size: .92rem; }
+        .module span { font-size: .8rem; color: rgba(255,255,255,.78); line-height: 1.45; display: block; }
 
-
-        .intro-text p {
-
-            color:
-                var(--muted);
-
-            margin-bottom:
-                1.2rem;
+        /* ================= OPEN SOURCE ================= */
+        .opensource { background: var(--surface); }
+        .oss-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem; }
+        .oss-card {
+            display: flex; flex-direction: column; padding: 2rem;
+            background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius);
         }
-
-
-        .principles {
-
-            display:
-                grid;
-
-            gap:
-                1rem;
+        .oss-top { display: flex; align-items: center; gap: .9rem; margin-bottom: 1rem; }
+        .oss-icon {
+            width: 48px; height: 48px; flex: 0 0 48px; display: flex; align-items: center; justify-content: center;
+            background: var(--gradient); color: #fff; border-radius: 12px; font-weight: 800; font-size: .8rem;
         }
+        .oss-top h3 { font-size: 1.15rem; line-height: 1.25; }
+        .oss-top small { display: block; color: var(--muted); font-size: .78rem; font-weight: 600; }
+        .oss-card > p { color: var(--muted); font-size: .92rem; margin-bottom: 1.3rem; }
 
-
-        .principle {
-
-            padding:
-                1.4rem;
-
-            background:
-                var(--background);
-
-            border:
-
-                1px solid
-
-                var(--border);
-
-            border-radius:
-                14px;
+        .install {
+            display: flex; align-items: center; justify-content: space-between; gap: .75rem;
+            background: var(--dark); color: #fff; border-radius: 10px; padding: .75rem .9rem;
+            font-family: var(--mono); font-size: .85rem; margin-bottom: 1.3rem;
         }
-
-
-        .principle h3 {
-
-            margin-bottom:
-                0.35rem;
-
-            font-size:
-                1rem;
+        .install code::before { content: "$ "; color: var(--accent-on-dark); }
+        .copy-btn {
+            background: rgba(255,255,255,.12); color: #fff; border: none; border-radius: 6px;
+            padding: .3rem .65rem; font-size: .72rem; font-weight: 700; cursor: pointer; font-family: inherit;
         }
+        .copy-btn:hover { background: rgba(255,255,255,.22); }
 
-
-        .principle p {
-
-            color:
-                var(--muted);
-
-            font-size:
-                0.9rem;
+        .link-row { display: flex; gap: .6rem; flex-wrap: wrap; margin-top: auto; }
+        .chip {
+            display: inline-flex; align-items: center; gap: .4rem;
+            padding: .55rem .9rem; border-radius: 8px; text-decoration: none;
+            background: var(--surface); border: 1px solid var(--border);
+            font-size: .84rem; font-weight: 700; transition: all .25s;
         }
+        .chip:hover { color: var(--primary); border-color: var(--primary-line); transform: translateY(-2px); }
 
-
-        /* ============================================================
-           FLAGSHIP RESEARCH
-        ============================================================ */
-
-        .research {
-
-            background:
-                var(--background);
-        }
-
-
-        .research-grid {
-
-            display:
-                grid;
-
-            grid-template-columns:
-
-                repeat(
-                    auto-fit,
-                    minmax(
-                        250px,
-                        1fr
-                    )
-                );
-
-            gap:
-                1.5rem;
-        }
-
-
-        .research-card {
-
-            background:
-                var(--surface);
-
-            border:
-
-                1px solid
-
-                var(--border);
-
-            border-radius:
-                16px;
-
-            padding:
-                1.7rem;
-
-            transition:
-                all 0.3s ease;
-        }
-
-
-        .research-card:hover {
-
-            transform:
-                translateY(-7px);
-
-            box-shadow:
-                var(--shadow-md);
-        }
-
-
-        .research-number {
-
-            width:
-                42px;
-
-            height:
-                42px;
-
-            display:
-                flex;
-
-            align-items:
-                center;
-
-            justify-content:
-                center;
-
-            border-radius:
-                10px;
-
-            background:
-
-                rgba(
-                    194,
-                    24,
-                    91,
-                    0.1
-                );
-
-            color:
-                var(--primary);
-
-            font-weight:
-                800;
-
-            margin-bottom:
-                1rem;
-        }
-
-
-        .research-card h3 {
-
-            margin-bottom:
-                0.6rem;
-
-            font-size:
-                1.05rem;
-        }
-
-
-        .research-card p {
-
-            color:
-                var(--muted);
-
-            font-size:
-                0.9rem;
-        }
-
-
-        /* ============================================================
-           RESEARCH PIPELINE
-        ============================================================ */
-
-        .pipeline-section {
-
-            background:
-                var(--dark);
-
-            color:
-                white;
-        }
-
-
-        .pipeline-section .section-description {
-
-            color:
-
-                rgba(
-                    255,
-                    255,
-                    255,
-                    0.65
-                );
-        }
-
-
-        .pipeline {
-
-            display:
-                grid;
-
-            grid-template-columns:
-
-                repeat(
-                    auto-fit,
-                    minmax(
-                        170px,
-                        1fr
-                    )
-                );
-
-            gap:
-                1rem;
-        }
-
-
-        .pipeline-step {
-
-            position:
-                relative;
-
-            padding:
-                1.5rem;
-
-            background:
-
-                rgba(
-                    255,
-                    255,
-                    255,
-                    0.06
-                );
-
-            border:
-
-                1px solid
-
-                rgba(
-                    255,
-                    255,
-                    255,
-                    0.08
-                );
-
-            border-radius:
-                14px;
-        }
-
-
-        .pipeline-step span {
-
-            display:
-                block;
-
-            color:
-                #ff8fbd;
-
-            font-size:
-                0.75rem;
-
-            font-weight:
-                800;
-
-            margin-bottom:
-                0.5rem;
-        }
-
-
-        .pipeline-step h3 {
-
-            font-size:
-                0.95rem;
-
-            line-height:
-                1.35;
-        }
-
-
-        /* ============================================================
-           RESEARCH TO ENGINEERING
-        ============================================================ */
-
-        .translation {
-
-            background:
-                var(--surface);
-        }
-
-
-        .translation-flow {
-
-            display:
-                grid;
-
-            grid-template-columns:
-
-                repeat(
-                    5,
-                    1fr
-                );
-
-            gap:
-                1rem;
-
-            align-items:
-                stretch;
-        }
-
-
-        .flow-card {
-
-            padding:
-                1.5rem;
-
-            background:
-                var(--background);
-
-            border-radius:
-                14px;
-
-            border:
-
-                1px solid
-
-                var(--border);
-        }
-
-
-        .flow-index {
-
-            color:
-                var(--primary);
-
-            font-weight:
-                800;
-
-            font-size:
-                0.8rem;
-
-            margin-bottom:
-                0.8rem;
-        }
-
-
-        .flow-card h3 {
-
-            font-size:
-                1rem;
-
-            margin-bottom:
-                0.5rem;
-        }
-
-
-        .flow-card p {
-
-            color:
-                var(--muted);
-
-            font-size:
-                0.84rem;
-        }
-
-
-        /* ============================================================
-           ENGINEERING
-        ============================================================ */
-
-        .engineering {
-
-            background:
-                var(--background);
-        }
-
-
-        .engineering-grid {
-
-            display:
-                grid;
-
-            grid-template-columns:
-
-                repeat(
-                    auto-fit,
-                    minmax(
-                        260px,
-                        1fr
-                    )
-                );
-
-            gap:
-                1.5rem;
-        }
-
-
-        .engineering-card {
-
-            background:
-                var(--surface);
-
-            padding:
-                1.7rem;
-
-            border-radius:
-                16px;
-
-            border:
-
-                1px solid
-
-                var(--border);
-        }
-
-
-        .engineering-icon {
-
-            width:
-                48px;
-
-            height:
-                48px;
-
-            display:
-                flex;
-
-            align-items:
-                center;
-
-            justify-content:
-                center;
-
-            background:
-                var(--gradient);
-
-            color:
-                white;
-
-            border-radius:
-                12px;
-
-            font-weight:
-                800;
-
-            margin-bottom:
-                1rem;
-        }
-
-
-        .engineering-card h3 {
-
-            font-size:
-                1.05rem;
-
-            margin-bottom:
-                0.6rem;
-        }
-
-
-        .engineering-card p {
-
-            color:
-                var(--muted);
-
-            font-size:
-                0.9rem;
-        }
-
-
-        /* ============================================================
-           VIDEO
-        ============================================================ */
-
-        .video-section {
-
-            background:
-                var(--surface);
-        }
-
-
+        .plugin { display: grid; grid-template-columns: 1fr 1.35fr; gap: 2.5rem; align-items: center; padding: 2rem; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); }
         .video-wrapper {
-
-            position:
-                relative;
-
-            max-width:
-                950px;
-
-            margin:
-                0 auto;
-
-            aspect-ratio:
-                16 / 9;
-
-            border-radius:
-                20px;
-
-            overflow:
-                hidden;
-
-            box-shadow:
-                var(--shadow-lg);
-
-            background:
-                var(--dark);
+            position: relative; aspect-ratio: 16 / 9; border-radius: 14px; overflow: hidden;
+            box-shadow: var(--shadow-lg); background: var(--dark);
         }
+        .video-wrapper iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: none; }
 
-
-        .video-wrapper iframe {
-
-            position:
-                absolute;
-
-            inset:
-                0;
-
-            width:
-                100%;
-
-            height:
-                100%;
-
-            border:
-                none;
-        }
-
-
-        /* ============================================================
-           DETECTION
-        ============================================================ */
-
-        .detection {
-
-            background:
-                var(--background);
-        }
-
-
-        .detection-grid {
-
-            display:
-                grid;
-
-            grid-template-columns:
-
-                1fr
-
-                1fr;
-
-            gap:
-                2rem;
-
-            max-width:
-                950px;
-
-            margin:
-                0 auto;
-        }
-
-
-        .detection-card {
-
-            background:
-                var(--surface);
-
-            border-radius:
-                16px;
-
-            overflow:
-                hidden;
-
-            border:
-
-                1px solid
-
-                var(--border);
-
-            box-shadow:
-                var(--shadow-sm);
-        }
-
-
-        .detection-card img {
-
-            width:
-                100%;
-
-            aspect-ratio:
-                1;
-
-            object-fit:
-                cover;
-
-            display:
-                block;
-        }
-
-
-        .detection-caption {
-
-            padding:
-                1.2rem;
-
-            text-align:
-                center;
-
-            font-weight:
-                700;
-
-            font-size:
-                0.92rem;
-        }
-
-
-        /* ============================================================
-           PLATFORM ECOSYSTEM
-        ============================================================ */
-
-        .ecosystem {
-
-            background:
-                var(--surface);
-        }
-
-
-        .ecosystem-grid {
-
-            display:
-                grid;
-
-            grid-template-columns:
-
-                repeat(
-                    3,
-                    1fr
-                );
-
-            gap:
-                1.5rem;
-        }
-
-
-        .ecosystem-group {
-
-            padding:
-                1.7rem;
-
-            border:
-
-                1px solid
-
-                var(--border);
-
-            border-radius:
-                16px;
-
-            background:
-                var(--background);
-        }
-
-
-        .ecosystem-group h3 {
-
-            margin-bottom:
-                1rem;
-
-            color:
-                var(--primary);
-        }
-
-
-        .ecosystem-links {
-
-            display:
-                flex;
-
-            flex-direction:
-                column;
-
-            gap:
-                0.7rem;
-        }
-
-
-        .ecosystem-link {
-
-            padding:
-                0.85rem;
-
-            background:
-                white;
-
-            border-radius:
-                9px;
-
-            text-decoration:
-                none;
-
-            border:
-
-                1px solid
-
-                var(--border);
-
-            font-size:
-                0.88rem;
-
-            font-weight:
-                650;
-
-            transition:
-                all 0.25s ease;
-        }
-
-
-        .ecosystem-link:hover {
-
-            color:
-                var(--primary);
-
-            transform:
-                translateX(4px);
-        }
-
-
-        /* ============================================================
-           OPEN SOURCE
-        ============================================================ */
-
-        .opensource {
-
-            background:
-                var(--background);
-        }
-
-
-        .opensource-grid {
-
-            display:
-                grid;
-
-            grid-template-columns:
-
-                repeat(
-                    auto-fit,
-                    minmax(
-                        280px,
-                        1fr
-                    )
-                );
-
-            gap:
-                1.5rem;
-        }
-
-
-        .opensource-card {
-
-            display:
-                block;
-
-            text-decoration:
-                none;
-
-            background:
-                var(--surface);
-
-            padding:
-                1.7rem;
-
-            border-radius:
-                16px;
-
-            border:
-
-                1px solid
-
-                var(--border);
-
-            transition:
-                all 0.3s ease;
-        }
-
-
-        .opensource-card:hover {
-
-            transform:
-                translateY(-6px);
-
-            box-shadow:
-                var(--shadow-md);
-        }
-
-
-        .opensource-card h3 {
-
-            margin-bottom:
-                0.6rem;
-
-            font-size:
-                1.05rem;
-        }
-
-
-        .opensource-card p {
-
-            color:
-                var(--muted);
-
-            font-size:
-                0.9rem;
-        }
-
-
-        /* ============================================================
-           PUBLICATIONS
-        ============================================================ */
-
-        .publications {
-
-            background:
-                var(--surface);
-        }
-
-
-        .publication-list {
-
-            max-width:
-                900px;
-
-            margin:
-                0 auto;
-
-            display:
-                flex;
-
-            flex-direction:
-                column;
-
-            gap:
-                0.8rem;
-        }
-
-
-        .publication {
-
-            display:
-                flex;
-
-            align-items:
-                center;
-
-            gap:
-                1rem;
-
-            padding:
-                1.2rem;
-
-            text-decoration:
-                none;
-
-            border:
-
-                1px solid
-
-                var(--border);
-
-            border-radius:
-                12px;
-
-            transition:
-                all 0.25s ease;
-        }
-
-
-        .publication:hover {
-
-            transform:
-                translateX(5px);
-
-            box-shadow:
-                var(--shadow-sm);
-        }
-
-
-        .publication-index {
-
-            min-width:
-                38px;
-
-            height:
-                38px;
-
-            display:
-                flex;
-
-            align-items:
-                center;
-
-            justify-content:
-                center;
-
-            border-radius:
-                50%;
-
-            background:
-                var(--primary);
-
-            color:
-                white;
-
-            font-size:
-                0.8rem;
-
-            font-weight:
-                800;
-        }
-
-
-        .publication span {
-
-            color:
-                var(--muted);
-
-            font-size:
-                0.9rem;
-        }
-
-
-        /* ============================================================
-           COLLABORATION
-        ============================================================ */
-
-        .collaboration {
-
-            position:
-                relative;
-
-            overflow:
-                hidden;
-
-            background:
-                var(--gradient);
-
-            color:
-                white;
-        }
-
-
+        /* ================= COLLABORATE ================= */
+        .collaboration { position: relative; overflow: hidden; background: var(--gradient); color: #fff; }
         .collaboration::before {
-
-            content:
-                "";
-
-            position:
-                absolute;
-
-            width:
-                500px;
-
-            height:
-                500px;
-
-            border-radius:
-                50%;
-
-            background:
-
-                rgba(
-                    255,
-                    255,
-                    255,
-                    0.08
-                );
-
-            top:
-                -250px;
-
-            right:
-                -150px;
+            content: ""; position: absolute; width: 560px; height: 560px; border-radius: 50%;
+            background: rgba(255,255,255,.07); top: -260px; right: -160px;
         }
+        .collaboration .container { position: relative; z-index: 1; }
+        .collaboration .section-label { color: #fff; opacity: .85; }
+        .collaboration .section-title { color: #fff; }
+        .collaboration .section-description { color: rgba(255,255,255,.82); }
 
-
-        .collaboration .container {
-
-            position:
-                relative;
-
-            z-index:
-                1;
-
-            max-width:
-                900px;
+        .partner-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.2rem; margin-bottom: 2.6rem; }
+        .partner {
+            padding: 1.7rem; background: rgba(255,255,255,.11);
+            border: 1px solid rgba(255,255,255,.18); border-radius: var(--radius);
         }
+        .partner h3 { font-size: 1.1rem; margin-bottom: .35rem; }
+        .partner .for { font-size: .82rem; color: rgba(255,255,255,.72); margin-bottom: 1rem; }
+        .partner ul { list-style: none; display: grid; gap: .5rem; }
+        .partner li { font-size: .88rem; padding-left: 1.2rem; position: relative; color: rgba(255,255,255,.92); }
+        .partner li::before { content: ""; position: absolute; left: 0; top: .55em; width: 6px; height: 6px; border-radius: 50%; background: #fff; }
 
+        .cta-row { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
+        .cta-note { font-size: .85rem; color: rgba(255,255,255,.75); }
+        .cta-note a { color: #fff; font-weight: 700; }
 
-        .collaboration p {
+        /* ================= FOOTER ================= */
+        footer { background: var(--dark); color: rgba(255,255,255,.65); padding: 3rem 2rem 2.2rem; font-size: .85rem; }
+        .footer-grid { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 2.5rem; padding-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,.1); }
+        .footer-brand { display: flex; align-items: center; gap: .7rem; margin-bottom: .8rem; }
+        .footer-brand img { height: 36px; width: auto; }
+        .footer-brand b { color: #fff; font-size: 1.05rem; }
+        footer h4 { color: #fff; font-size: .78rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: .8rem; }
+        footer ul { list-style: none; display: grid; gap: .45rem; }
+        footer a { color: rgba(255,255,255,.85); text-decoration: none; }
+        footer a:hover { color: #fff; text-decoration: underline; }
+        .footer-bottom { max-width: 1180px; margin: 0 auto; padding-top: 1.5rem; display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; font-size: .78rem; }
 
-            color:
-
-                rgba(
-                    255,
-                    255,
-                    255,
-                    0.82
-                );
-
-            font-size:
-                1.05rem;
-
-            margin-bottom:
-                2rem;
-        }
-
-
-        .collaboration-grid {
-
-            display:
-                grid;
-
-            grid-template-columns:
-
-                repeat(
-                    auto-fit,
-                    minmax(
-                        200px,
-                        1fr
-                    )
-                );
-
-            gap:
-                1rem;
-
-            margin-bottom:
-                2rem;
-        }
-
-
-        .collaboration-item {
-
-            padding:
-                1rem;
-
-            background:
-
-                rgba(
-                    255,
-                    255,
-                    255,
-                    0.12
-                );
-
-            border:
-
-                1px solid
-
-                rgba(
-                    255,
-                    255,
-                    255,
-                    0.15
-                );
-
-            border-radius:
-                10px;
-
-            font-size:
-                0.9rem;
-
-            font-weight:
-                650;
-        }
-
-
-        .collaboration .btn-outline {
-
-            border-color:
-                white;
-
-            color:
-                white;
-        }
-
-
-        .collaboration .btn-outline:hover {
-
-            background:
-                white;
-
-            color:
-                var(--primary);
-        }
-
-
-        /* ============================================================
-           FOOTER
-        ============================================================ */
-
-        footer {
-
-            background:
-                var(--dark);
-
-            color:
-
-                rgba(
-                    255,
-                    255,
-                    255,
-                    0.65
-                );
-
-            text-align:
-                center;
-
-            padding:
-
-                2.5rem
-
-                1.5rem;
-
-            font-size:
-                0.85rem;
-        }
-
-
-        footer a {
-
-            color:
-                white;
-
-            text-decoration:
-                none;
-
-            font-weight:
-                600;
-        }
-
-
-        /* ============================================================
-           RESPONSIVE
-        ============================================================ */
-
+        /* ================= RESPONSIVE ================= */
         @media (max-width: 1000px) {
-
-            .nav-center {
-                display: none;
-            }
-
-
-            .translation-flow {
-
-                grid-template-columns:
-
-                    repeat(
-                        auto-fit,
-                        minmax(
-                            200px,
-                            1fr
-                        )
-                    );
-            }
-
-
-            .ecosystem-grid {
-
-                grid-template-columns:
-                    1fr;
-            }
+            .nav-center { display: none; }
+            .research-head, .result, .platform-card, .plugin { grid-template-columns: 1fr; }
+            .research-head { gap: 2.5rem; }
+            .partner-grid { grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: 1fr 1fr; }
+            .footer-grid > div:first-child { grid-column: 1 / -1; }
         }
-
 
         @media (max-width: 768px) {
-
-            nav {
-
-                padding:
-
-                    0.8rem
-
-                    1rem;
-            }
-
-
-            .nav-actions {
-
-                gap:
-                    0.4rem;
-            }
-
-
-            .nav-actions .btn {
-
-                padding:
-
-                    0.55rem
-
-                    0.7rem;
-
-                font-size:
-                    0.75rem;
-            }
-
-
-            section {
-
-                padding:
-
-                    4.5rem
-
-                    1.25rem;
-            }
-
-
-            .hero-content {
-
-                padding:
-
-                    9rem
-
-                    1.25rem
-
-                    4rem;
-            }
-
-
-            .intro-grid,
-
-            .detection-grid {
-
-                grid-template-columns:
-                    1fr;
-            }
-
-
-            .hero h1 {
-
-                letter-spacing:
-                    -0.8px;
-            }
-
-
-            .institution-bar {
-
-                font-size:
-                    0.65rem;
-            }
+            section { padding: 4.5rem 1.25rem; }
+            .hero { padding: 0 1.25rem; }
+            .hero-content { padding: 9rem 0 3.5rem; }
+            .hero h1 { letter-spacing: -.8px; }
+            nav { padding: .7rem 1rem; }
+            .brand img { height: 36px; }
+            .brand-subtitle { display: none; }
+            .nav-actions .btn { padding: .5rem .75rem; font-size: .75rem; }
+            .nav-actions .btn-outline { display: none; }
+            .institution-bar { font-size: .66rem; }
+            .hero-stats { grid-template-columns: 1fr 1fr; }
+            .stat:nth-child(2) { border-right: none; }
+            .stat:nth-child(-n+2) { border-bottom: 1px solid var(--border); }
+            .pub-grid, .oss-grid, .methods, .result-images { grid-template-columns: 1fr; }
+            .result-images { grid-template-columns: 1fr 1fr; }
+            .result, .platform-main, .platform-modules, .plugin, .oss-card { padding: 1.5rem; }
+            .footer-grid { grid-template-columns: 1fr; }
         }
-
     </style>
 </head>
 
-
 <body>
 
-
-<!-- ================================================================
-     INSTITUTION
-================================================================ -->
-
+<!-- ================= INSTITUTION ================= -->
 <div class="institution-bar">
-
-    <a
-        href="https://latis-eniso.tn/public/"
-        target="_blank"
-    >
-        Laboratory of Advanced Technology and Intelligent Systems (LATIS)
-    </a>
-
-    — Sousse University | AI in Medical Imaging Research
-
+    <a href="https://latis-eniso.tn/public/" target="_blank" rel="noopener">Laboratory of Advanced Technology and Intelligent Systems (LATIS)</a>
+    &nbsp;— Sousse University · AI in Medical Imaging
 </div>
 
-
-<!-- ================================================================
-     NAVIGATION
-================================================================ -->
-
+<!-- ================= NAV ================= -->
 <nav>
-
-    <a
-        href="#home"
-        class="brand"
-    >
-
-        <img
-            src="logo.png"
-            alt="PTM Medical AI Platform"
-        >
-
+    <a href="#home" class="brand">
+        <img src="logo.png" alt="PTM logo">
         <div class="brand-text">
-
-            <span class="brand-name">
-                PTM
-            </span>
-
-            <span class="brand-subtitle">
-                Medical AI Platform
-            </span>
-
+            <span class="brand-name">PTM</span>
+            <span class="brand-subtitle">Medical AI Platform</span>
         </div>
-
     </a>
 
-
     <div class="nav-center">
-
-        <a href="#research">
-            Research
-        </a>
-
-        <a href="#engineering">
-            Engineering
-        </a>
-
-        <a href="#ecosystem">
-            Ecosystem
-        </a>
-
-        <a href="#opensource">
-            Open Source
-        </a>
-
-        <a href="#publications">
-            Publications
-        </a>
-
+        <a href="#research">Research</a>
+        <a href="#publications">Publications</a>
+        <a href="#mammodetect">MammoDetect AI</a>
+        <a href="#opensource">Open Source</a>
+        <a href="#collaborate">Collaborate</a>
     </div>
-
 
     <div class="nav-actions">
-
-        <a
-            href="#collaborate"
-            class="btn btn-outline"
-        >
-            Collaborate
-        </a>
-
-        <a
-            href="https://www.ptm.tn/"
-            target="_blank"
-            class="btn btn-primary"
-        >
-            Access Platform
-        </a>
-
+        <a href="#collaborate" class="btn btn-outline">Partner with us</a>
+        <a href="https://mcd.ptm.tn/" target="_blank" rel="noopener" class="btn btn-primary">Launch Medical SaaS</a>
     </div>
-
 </nav>
 
-
-<!-- ================================================================
-     HERO
-================================================================ -->
-
-<section
-    class="hero"
-    id="home"
->
-
+<!-- ================= HERO ================= -->
+<section class="hero" id="home">
     <div class="hero-background"></div>
 
-
     <div class="hero-content">
+        <div class="hero-label"><span class="pulse"></span> Research → Industry · Medical AI</div>
 
-        <div class="hero-label">
-
-            Open Medical AI Research Platform
-
-        </div>
-
-
-        <h1>
-
-            From Medical Imaging Research
-            to
-
-            <span>
-                Reproducible AI Systems.
-            </span>
-
-        </h1>
-
+        <h1>From the research lab to <span>production-ready medical AI.</span></h1>
 
         <p class="hero-description">
-
-            PTM brings together medical image analysis research,
-            artificial intelligence, DICOM engineering,
-            visualization and deployable software infrastructure.
-
-            Our flagship research program focuses on mammography
-            and microcalcification detection.
-
+            PTM bridges academic research and industry. We industrialize published
+            mammography algorithms into a deployable medical SaaS, a standardized
+            Python processing stack and developer tools for DICOM — engineered for
+            reliability, integration and scale.
         </p>
-
 
         <div class="hero-buttons">
-
-            <a
-                href="#research"
-                class="btn btn-primary"
-            >
-                Explore Research
-            </a>
-
-
-            <a
-                href="#engineering"
-                class="btn btn-outline"
-            >
-                Explore Engineering
-            </a>
-
-
-            <a
-                href="https://mcd.ptm.tn"
-                target="_blank"
-                class="btn btn-outline"
-            >
-                MammoDetect AI
-            </a>
-
+            <a href="#research" class="btn btn-primary btn-lg">See how it works <span class="arrow">→</span></a>
+            <a href="https://mcd.ptm.tn/" target="_blank" rel="noopener" class="btn btn-outline btn-lg">Launch Medical SaaS</a>
         </div>
 
+        <div class="hero-stats">
+            <div class="stat"><strong>SaaS</strong><span>Deployed web platform</span></div>
+            <div class="stat"><strong>4</strong><span>Published methods in production</span></div>
+            <div class="stat"><strong>PyPI</strong><span>Open-source library</span></div>
+            <div class="stat"><strong>DICOM</strong><span>Native workflows</span></div>
+        </div>
+    </div>
+</section>
 
-        <div class="hero-meta">
+<!-- ================= RESEARCH + PUBLICATIONS ================= -->
+<section class="research" id="research">
+    <div class="container">
 
-            <div class="meta-item">
-
-                <span class="meta-dot"></span>
-
-                Research-Driven
-
+        <div class="research-head">
+            <div class="animate">
+                <span class="section-label">Core Technology</span>
+                <h2 class="section-title">Detecting microcalcifications — the earliest sign of breast cancer.</h2>
+                <p class="section-description">
+                    Microcalcifications are tiny calcium deposits, often well under a millimetre,
+                    with low contrast against dense breast tissue. Our detection engine combines
+                    proven image-analysis methods with attention-guided deep learning, validated
+                    on public benchmarks and packaged for use in real imaging workflows.
+                </p>
             </div>
 
+            <div class="methods animate">
+                <div class="method"><b>Mathematical morphology</b><span>Multi-scale structuring elements, Top-Hat and structural similarity maps.</span></div>
+                <div class="method"><b>Superpixel analysis</b><span>Local, adaptive thresholding over homogeneous regions.</span></div>
+                <div class="method"><b>Collaborative classification</b><span>Graph-based knowledge propagation across detectors.</span></div>
+                <div class="method"><b>Deep learning</b><span>CNN segmentation guided by image-processing priors.</span></div>
+                <div class="method"><b>Attention &amp; transformers</b><span>Steering models toward clinically relevant regions.</span></div>
+                <div class="method"><b>Benchmarked performance</b><span>Standard metrics on public datasets, tracked across every model release.</span></div>
+            </div>
+        </div>
 
-            <div class="meta-item">
-
-                <span class="meta-dot"></span>
-
-                DICOM Native
-
+        <!-- Publications -->
+        <div id="publications">
+            <div class="pubs-title animate">
+                <h3>Published research behind the product</h3>
+                <p>The methods running inside the platform.</p>
             </div>
 
+            <div class="pub-grid">
+                <a class="pub animate" href="https://ieeexplore.ieee.org/abstract/document/11232287" target="_blank" rel="noopener">
+                    <div class="pub-meta"><span class="pub-venue">IEEE</span><span class="pub-year">2024</span></div>
+                    <h4>Microcalcification detection in mammography</h4>
+                    <div class="pub-journal">IEEE Xplore</div>
+                    <span class="pub-link">Read paper →</span>
+                </a>
 
-            <div class="meta-item">
+                <a class="pub animate" href="https://link.springer.com/article/10.1007/s10278-022-00678-9" target="_blank" rel="noopener">
+                    <div class="pub-meta"><span class="pub-venue">Springer</span><span class="pub-year">2022</span></div>
+                    <h4>A New Collaborative Classification Process for Microcalcification Detection Based on Graphs and Knowledge Propagation</h4>
+                    <div class="pub-journal">Journal of Digital Imaging, vol. 35</div>
+                    <span class="pub-link">Read paper →</span>
+                </a>
 
-                <span class="meta-dot"></span>
+                <a class="pub animate" href="https://www.sciencedirect.com/science/article/abs/pii/S0208521620300607" target="_blank" rel="noopener">
+                    <div class="pub-meta"><span class="pub-venue">Elsevier</span><span class="pub-year">2020</span></div>
+                    <h4>Automatic Detection of Microcalcification Based on Morphological Operations and Structural Similarity Indices</h4>
+                    <div class="pub-journal">Biocybernetics and Biomedical Engineering, vol. 40</div>
+                    <span class="pub-link">Read paper →</span>
+                </a>
 
-                AI Engineering
+                <a class="pub animate" href="https://ieeexplore.ieee.org/abstract/document/9288012" target="_blank" rel="noopener">
+                    <div class="pub-meta"><span class="pub-venue">IEEE</span><span class="pub-year">2020</span></div>
+                    <h4>Mammographic image analysis for microcalcification detection</h4>
+                    <div class="pub-journal">IEEE Xplore</div>
+                    <span class="pub-link">Read paper →</span>
+                </a>
+            </div>
+        </div>
 
+        <!-- Result showcase -->
+        <div class="result animate">
+            <div>
+                <span class="section-label">From Lab to Product</span>
+                <h3>From a mammogram region of interest to a segmentation map.</h3>
+                <p>Every published method is industrialized into the same production pipeline that powers the medical SaaS.</p>
+                <ol class="pipeline">
+                    <li>DICOM ingestion &amp; standardization</li>
+                    <li>Image enhancement &amp; computational priors</li>
+                    <li>AI detection &amp; segmentation</li>
+                    <li>Quantitative evaluation</li>
+                </ol>
             </div>
 
-
-            <div class="meta-item">
-
-                <span class="meta-dot"></span>
-
-                Open Source
-
+            <div class="result-images">
+                <figure>
+                    <img src="roi.png" alt="Mammogram region of interest" loading="lazy">
+                    <figcaption>Region of interest</figcaption>
+                </figure>
+                <figure>
+                    <img src="segmentation.png" alt="AI microcalcification segmentation output" loading="lazy">
+                    <figcaption>AI segmentation output</figcaption>
+                </figure>
             </div>
-
         </div>
 
     </div>
-
 </section>
 
-
-<!-- ================================================================
-     WHAT IS PTM
-================================================================ -->
-
-<section class="intro">
-
+<!-- ================= MAMMODETECT AI ================= -->
+<section class="platform" id="mammodetect">
     <div class="container">
-
-        <div class="intro-grid">
-
-            <div
-                class="intro-text animate"
-            >
-
-                <span class="section-label">
-                    The Platform
-                </span>
-
-
-                <h2 class="section-title">
-
-                    Research, Engineering
-                    and Medical AI
-                    in One Ecosystem.
-
-                </h2>
-
-
-                <p>
-
-                    PTM is a medical artificial intelligence research
-                    and engineering platform designed to transform
-                    research algorithms into reproducible,
-                    deployable and accessible medical imaging systems.
-
-                </p>
-
-
-                <p>
-
-                    The platform connects scientific research,
-                    AI model development, DICOM processing,
-                    visualization, inference services and specialized
-                    medical imaging applications within a unified
-                    ecosystem.
-
-                </p>
-
-
-                <p>
-
-                    Our first flagship research program focuses on
-                    mammography and microcalcification detection,
-                    combining classical image processing,
-                    deep learning and attention-based AI methods.
-
-                </p>
-
-            </div>
-
-
-            <div class="principles animate">
-
-                <div class="principle">
-
-                    <h3>
-                        Research
-                    </h3>
-
-                    <p>
-                        Development and evaluation of algorithms
-                        for medical image analysis.
-                    </p>
-
-                </div>
-
-
-                <div class="principle">
-
-                    <h3>
-                        Engineering
-                    </h3>
-
-                    <p>
-                        Transforming research prototypes into reusable
-                        software and AI services.
-                    </p>
-
-                </div>
-
-
-                <div class="principle">
-
-                    <h3>
-                        Reproducibility
-                    </h3>
-
-                    <p>
-                        Building experiments and infrastructure
-                        that can be evaluated and extended.
-                    </p>
-
-                </div>
-
-
-                <div class="principle">
-
-                    <h3>
-                        Open Ecosystem
-                    </h3>
-
-                    <p>
-                        Developing reusable tools and open-source
-                        software for the medical imaging community.
-                    </p>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- ================================================================
-     RESEARCH
-================================================================ -->
-
-<section
-    class="research"
-    id="research"
->
-
-    <div class="container">
-
         <div class="center animate">
-
-            <span class="section-label">
-                Flagship Research
-            </span>
-
-
-            <h2 class="section-title">
-
-                Microcalcification Detection
-                in Mammography
-
-            </h2>
-
-
+            <span class="section-label">The Product</span>
+            <h2 class="section-title">One medical SaaS for microcalcification detection.</h2>
             <p class="section-description center">
-
-                PTM's flagship research program investigates
-                computational approaches for detecting and
-                localizing microcalcifications in mammographic
-                images using classical image processing,
-                deep learning and attention-guided AI.
-
+                MammoDetect AI brings every PTM component — viewers, AI models, inference and
+                study management — into a single web platform.
             </p>
-
         </div>
 
-
-        <div class="research-grid">
-
-            <div class="research-card animate">
-
-                <div class="research-number">
-                    01
+        <div class="platform-card animate">
+            <div class="platform-main">
+                <div class="badge-row">
+                    <span class="badge dark">Flagship</span>
+                    <span class="badge">Web platform</span>
+                    <span class="badge">DICOM-native</span>
                 </div>
 
-                <h3>
-                    Image Processing
-                </h3>
-
+                <h2>MammoDetect AI</h2>
                 <p>
-
-                    Investigation of morphological and enhancement
-                    methods including Top-Hat filtering,
-                    Laplacian-based enhancement,
-                    Hessian analysis and texture representations.
-
+                    An end-to-end SaaS for AI-assisted microcalcification detection in mammography.
+                    Upload DICOM studies, review them in a dedicated mammography viewer, run the
+                    detection models, and manage studies and results from one ERP-style workspace —
+                    with full technical documentation for integration and evaluation.
                 </p>
 
-            </div>
-
-
-            <div class="research-card animate">
-
-                <div class="research-number">
-                    02
+                <div class="platform-buttons">
+                    <a href="https://mcd.ptm.tn/" target="_blank" rel="noopener" class="btn btn-primary btn-lg">Launch Medical SaaS <span class="arrow">→</span></a>
+                    <a href="https://mcddocs.ptm.tn/" target="_blank" rel="noopener" class="btn btn-outline btn-lg">Read the documentation</a>
                 </div>
-
-                <h3>
-                    Deep Learning
-                </h3>
-
-                <p>
-
-                    Development and evaluation of convolutional
-                    neural networks for microcalcification
-                    localization and segmentation.
-
-                </p>
-
+                <span class="url">mcd.ptm.tn · mcddocs.ptm.tn</span>
             </div>
 
-
-            <div class="research-card animate">
-
-                <div class="research-number">
-                    03
+            <div class="platform-modules">
+                <h3>What's inside</h3>
+                <div class="module-list">
+                    <div class="module"><div class="module-icon">DCM</div><div><b>DICOM processing</b><span>Ingestion, standardization and preprocessing of mammograms.</span></div></div>
+                    <div class="module"><div class="module-icon">VIEW</div><div><b>Mammography viewer</b><span>Purpose-built review of images and AI overlays.</span></div></div>
+                    <div class="module"><div class="module-icon">AI</div><div><b>Models &amp; inference</b><span>Classical and deep-learning detectors behind one service.</span></div></div>
+                    <div class="module"><div class="module-icon">ERP</div><div><b>Study &amp; workflow management</b><span>Patients, studies, results and users in one place.</span></div></div>
                 </div>
-
-                <h3>
-                    Attention-Guided AI
-                </h3>
-
-                <p>
-
-                    Research into integrating image-processing
-                    priors with neural attention mechanisms
-                    to guide models toward relevant regions.
-
-                </p>
-
             </div>
-
-
-            <div class="research-card animate">
-
-                <div class="research-number">
-                    04
-                </div>
-
-                <h3>
-                    Vision Transformers
-                </h3>
-
-                <p>
-
-                    Exploring transformer architectures and
-                    attention mechanisms for medical image
-                    understanding.
-
-                </p>
-
-            </div>
-
-
-            <div class="research-card animate">
-
-                <div class="research-number">
-                    05
-                </div>
-
-                <h3>
-                    Explainability
-                </h3>
-
-                <p>
-
-                    Visualizing model decisions and regions
-                    of interest to improve interpretability
-                    and research understanding.
-
-                </p>
-
-            </div>
-
-
-            <div class="research-card animate">
-
-                <div class="research-number">
-                    06
-                </div>
-
-                <h3>
-                    Reproducible Evaluation
-                </h3>
-
-                <p>
-
-                    Standardized experiments, quantitative metrics
-                    and comparisons across classical and
-                    deep-learning approaches.
-
-                </p>
-
-            </div>
-
         </div>
-
     </div>
-
 </section>
 
-
-<!-- ================================================================
-     RESEARCH PIPELINE
-================================================================ -->
-
-<section class="pipeline-section">
-
+<!-- ================= OPEN SOURCE ================= -->
+<section class="opensource" id="opensource">
     <div class="container">
-
         <div class="center animate">
-
-            <span
-                class="section-label"
-                style="color:#ff8fbd;"
-            >
-                Research Pipeline
-            </span>
-
-
-            <h2 class="section-title">
-
-                From Mammogram to AI Output
-
-            </h2>
-
-
+            <span class="section-label">Open Source</span>
+            <h2 class="section-title">Open, production-grade building blocks.</h2>
             <p class="section-description center">
-
-                The research pipeline connects medical imaging
-                preprocessing, computational priors and AI models
-                within a reproducible evaluation workflow.
-
+                The components behind our SaaS are released openly, so research teams and
+                companies can integrate them directly into their own medical imaging products.
             </p>
-
         </div>
 
-
-        <div class="pipeline">
-
-            <div class="pipeline-step animate">
-
-                <span>
-                    STEP 01
-                </span>
-
-                <h3>
-                    Mammogram
-                </h3>
-
+        <div class="oss-grid">
+            <div class="oss-card animate">
+                <div class="oss-top">
+                    <div class="oss-icon">PY</div>
+                    <div>
+                        <h3>medical-image-std</h3>
+                        <small>Python library · open source</small>
+                    </div>
+                </div>
+                <p>
+                    Standardized loading, preprocessing and processing of medical images for
+                    research and production workflows — the same foundation running inside the medical SaaS.
+                </p>
+                <div class="install">
+                    <code id="pip-cmd">pip install medical-image-std</code>
+                    <button class="copy-btn" type="button" data-copy="pip install medical-image-std">Copy</button>
+                </div>
+                <div class="link-row">
+                    <a class="chip" href="https://github.com/LATIS-medical-Imaging/medical-image-std" target="_blank" rel="noopener">GitHub →</a>
+                    <a class="chip" href="https://pypi.org/project/medical-image-std/" target="_blank" rel="noopener">PyPI →</a>
+                </div>
             </div>
 
-
-            <div class="pipeline-step animate">
-
-                <span>
-                    STEP 02
-                </span>
-
-                <h3>
-                    DICOM Processing
-                </h3>
-
+            <div class="oss-card animate">
+                <div class="oss-top">
+                    <div class="oss-icon">DOC</div>
+                    <div>
+                        <h3>Technical documentation</h3>
+                        <small>Architecture · models · usage</small>
+                    </div>
+                </div>
+                <p>
+                    Reference documentation for the MammoDetect AI platform: how the pipeline is
+                    built, which models it runs, and how to integrate it — written for engineering
+                    teams and partners evaluating the system.
+                </p>
+                <div class="link-row">
+                    <a class="chip" href="https://mcddocs.ptm.tn/" target="_blank" rel="noopener">mcddocs.ptm.tn →</a>
+                </div>
             </div>
-
-
-            <div class="pipeline-step animate">
-
-                <span>
-                    STEP 03
-                </span>
-
-                <h3>
-                    Image Enhancement
-                </h3>
-
-            </div>
-
-
-            <div class="pipeline-step animate">
-
-                <span>
-                    STEP 04
-                </span>
-
-                <h3>
-                    AI Models
-                </h3>
-
-            </div>
-
-
-            <div class="pipeline-step animate">
-
-                <span>
-                    STEP 05
-                </span>
-
-                <h3>
-                    Detection & Segmentation
-                </h3>
-
-            </div>
-
-
-            <div class="pipeline-step animate">
-
-                <span>
-                    STEP 06
-                </span>
-
-                <h3>
-                    Quantitative Evaluation
-                </h3>
-
-            </div>
-
         </div>
 
+        <div class="plugin animate">
+            <div>
+                <div class="oss-top">
+                    <div class="oss-icon">IDE</div>
+                    <div>
+                        <h3>DICOM Viewer for JetBrains IDEs</h3>
+                        <small>JetBrains Marketplace plugin</small>
+                    </div>
+                </div>
+                <p style="color:var(--muted); font-size:.92rem; margin-bottom:1.3rem;">
+                    Open and inspect DICOM medical images directly inside PyCharm, IntelliJ IDEA and
+                    other JetBrains IDEs — no context switching while building medical imaging code.
+                </p>
+                <div class="link-row">
+                    <a class="chip" href="https://plugins.jetbrains.com/plugin/31122-dicom-viewer" target="_blank" rel="noopener">Get the plugin →</a>
+                </div>
+            </div>
+
+            <div class="video-wrapper">
+                <iframe
+                    src="https://www.youtube.com/embed/36GLZx6zphc"
+                    title="DICOM Viewer for JetBrains IDEs — demo"
+                    loading="lazy"
+                    allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen></iframe>
+            </div>
+        </div>
     </div>
-
 </section>
 
-
-<!-- ================================================================
-     RESEARCH TO ENGINEERING
-================================================================ -->
-
-<section class="translation">
-
+<!-- ================= COLLABORATE ================= -->
+<section class="collaboration" id="collaborate">
     <div class="container">
-
-        <div class="center animate">
-
-            <span class="section-label">
-                Research Translation
-            </span>
-
-
-            <h2 class="section-title">
-
-                From Research to Real Systems
-
-            </h2>
-
-
-            <p class="section-description center">
-
-                PTM is designed to bridge the gap between
-                experimental research and reusable medical
-                AI software systems.
-
-            </p>
-
-        </div>
-
-
-        <div class="translation-flow">
-
-            <div class="flow-card animate">
-
-                <div class="flow-index">
-                    01
-                </div>
-
-                <h3>
-                    Research
-                </h3>
-
-                <p>
-                    Algorithms and scientific experiments.
-                </p>
-
-            </div>
-
-
-            <div class="flow-card animate">
-
-                <div class="flow-index">
-                    02
-                </div>
-
-                <h3>
-                    Models
-                </h3>
-
-                <p>
-                    Training, validation and benchmarking.
-                </p>
-
-            </div>
-
-
-            <div class="flow-card animate">
-
-                <div class="flow-index">
-                    03
-                </div>
-
-                <h3>
-                    Services
-                </h3>
-
-                <p>
-                    Reusable AI inference services.
-                </p>
-
-            </div>
-
-
-            <div class="flow-card animate">
-
-                <div class="flow-index">
-                    04
-                </div>
-
-                <h3>
-                    Imaging
-                </h3>
-
-                <p>
-                    DICOM processing and visualization.
-                </p>
-
-            </div>
-
-
-            <div class="flow-card animate">
-
-                <div class="flow-index">
-                    05
-                </div>
-
-                <h3>
-                    Applications
-                </h3>
-
-                <p>
-                    Specialized medical AI tools.
-                </p>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- ================================================================
-     ENGINEERING
-================================================================ -->
-
-<section
-    class="engineering"
-    id="engineering"
->
-
-    <div class="container">
-
-        <div class="center animate">
-
-            <span class="section-label">
-                Engineering the Platform
-            </span>
-
-
-            <h2 class="section-title">
-
-                Building the Medical AI Stack
-
-            </h2>
-
-
-            <p class="section-description center">
-
-                PTM combines AI research with the software
-                infrastructure required to process,
-                visualize and deploy medical imaging models.
-
-            </p>
-
-        </div>
-
-
-        <div class="engineering-grid">
-
-            <div class="engineering-card animate">
-
-                <div class="engineering-icon">
-                    AI
-                </div>
-
-                <h3>
-                    AI Model Infrastructure
-                </h3>
-
-                <p>
-
-                    Centralized access to AI models,
-                    experimentation and model evaluation
-                    for medical imaging research.
-
-                </p>
-
-            </div>
-
-
-            <div class="engineering-card animate">
-
-                <div class="engineering-icon">
-                    DC
-                </div>
-
-                <h3>
-                    DICOM Processing
-                </h3>
-
-                <p>
-
-                    Native medical imaging workflows including
-                    image ingestion, preprocessing,
-                    conversion and visualization.
-
-                </p>
-
-            </div>
-
-
-            <div class="engineering-card animate">
-
-                <div class="engineering-icon">
-                    VI
-                </div>
-
-                <h3>
-                    Medical Image Viewers
-                </h3>
-
-                <p>
-
-                    Specialized visualization tools for
-                    reviewing medical images and AI-generated
-                    analysis results.
-
-                </p>
-
-            </div>
-
-
-            <div class="engineering-card animate">
-
-                <div class="engineering-icon">
-                    API
-                </div>
-
-                <h3>
-                    AI Inference Services
-                </h3>
-
-                <p>
-
-                    Connecting trained AI models with
-                    interactive medical imaging applications
-                    through reusable services.
-
-                </p>
-
-            </div>
-
-
-            <div class="engineering-card animate">
-
-                <div class="engineering-icon">
-                    APP
-                </div>
-
-                <h3>
-                    Research Applications
-                </h3>
-
-                <p>
-
-                    Specialized applications built around
-                    concrete medical imaging research problems.
-
-                </p>
-
-            </div>
-
-
-            <div class="engineering-card animate">
-
-                <div class="engineering-icon">
-                    OSS
-                </div>
-
-                <h3>
-                    Open Source Tooling
-                </h3>
-
-                <p>
-
-                    Reusable libraries and developer tools
-                    supporting medical image processing
-                    and reproducible research.
-
-                </p>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- ================================================================
-     VIDEO
-================================================================ -->
-
-<section class="video-section">
-
-    <div class="container">
-
-        <div class="center animate">
-
-            <span class="section-label">
-                Platform Demonstration
-            </span>
-
-
-            <h2 class="section-title">
-
-                AI in Action
-
-            </h2>
-
-
-            <p class="section-description center">
-
-                Explore how PTM applications connect medical
-                imaging data with AI models and visualization tools.
-
-            </p>
-
-        </div>
-
-
-        <div class="video-wrapper animate">
-
-            <iframe
-                src="https://www.youtube.com/embed/36GLZx6zphc"
-                title="PTM Medical AI Platform"
-                allowfullscreen>
-            </iframe>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- ================================================================
-     DETECTION EXAMPLE
-================================================================ -->
-
-<section class="detection">
-
-    <div class="container">
-
-        <div class="center animate">
-
-            <span class="section-label">
-                Research Output
-            </span>
-
-
-            <h2 class="section-title">
-
-                Microcalcification Detection Example
-
-            </h2>
-
-
-            <p class="section-description center">
-
-                From a mammography region of interest
-                to an AI-generated segmentation output.
-
-            </p>
-
-        </div>
-
-
-        <div class="detection-grid">
-
-            <div class="detection-card animate">
-
-                <img
-                    src="roi.png"
-                    alt="Mammogram Region of Interest"
-                >
-
-                <div class="detection-caption">
-
-                    Mammogram Region of Interest
-
-                </div>
-
-            </div>
-
-
-            <div class="detection-card animate">
-
-                <img
-                    src="segmentation.png"
-                    alt="AI Segmentation Output"
-                >
-
-                <div class="detection-caption">
-
-                    AI Detection and Segmentation Output
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- ================================================================
-     ECOSYSTEM
-================================================================ -->
-
-<section
-    class="ecosystem"
-    id="ecosystem"
->
-
-    <div class="container">
-
-        <div class="center animate">
-
-            <span class="section-label">
-                PTM Ecosystem
-            </span>
-
-
-            <h2 class="section-title">
-
-                One Platform.
-                Multiple Research Applications.
-
-            </h2>
-
-
-            <p class="section-description center">
-
-                PTM brings together specialized medical AI
-                applications, visualization tools and
-                research infrastructure.
-
-            </p>
-
-        </div>
-
-
-        <div class="ecosystem-grid">
-
-            <!-- Research Applications -->
-
-            <div class="ecosystem-group animate">
-
-                <h3>
-                    Research Applications
-                </h3>
-
-
-                <div class="ecosystem-links">
-
-                    <a
-                        href="https://mammo.ptm.tn"
-                        target="_blank"
-                        class="ecosystem-link"
-                    >
-                        Mammo Application
-                    </a>
-
-
-                    <a
-                        href="https://mcd.ptm.tn"
-                        target="_blank"
-                        class="ecosystem-link"
-                    >
-                        MammoDetect AI
-                    </a>
-
-
-                    <a
-                        href="https://ptr.ptm.tn"
-                        target="_blank"
-                        class="ecosystem-link"
-                    >
-                        PTR Application
-                    </a>
-
-
-                    <a
-                        href="https://uro.ptm.tn"
-                        target="_blank"
-                        class="ecosystem-link"
-                    >
-                        Urology Application
-                    </a>
-
-                </div>
-
-            </div>
-
-
-            <!-- Imaging Tools -->
-
-            <div class="ecosystem-group animate">
-
-                <h3>
-                    Medical Imaging Tools
-                </h3>
-
-
-                <div class="ecosystem-links">
-
-                    <a
-                        href="https://mammoviewer.ptm.tn"
-                        target="_blank"
-                        class="ecosystem-link"
-                    >
-                        Mammography Viewer
-                    </a>
-
-
-                    <a
-                        href="https://ptrviewer.ptm.tn"
-                        target="_blank"
-                        class="ecosystem-link"
-                    >
-                        PTR Viewer
-                    </a>
-
-
-                    <a
-                        href="https://viewer.ptm.tn"
-                        target="_blank"
-                        class="ecosystem-link"
-                    >
-                        Standard Medical Viewer
-                    </a>
-
-                </div>
-
-            </div>
-
-
-            <!-- Infrastructure -->
-
-            <div class="ecosystem-group animate">
-
-                <h3>
-                    Research Infrastructure
-                </h3>
-
-
-                <div class="ecosystem-links">
-
-                    <a
-                        href="https://mcdmodels.ptm.tn"
-                        target="_blank"
-                        class="ecosystem-link"
-                    >
-                        AI Models
-                    </a>
-
-
-                    <a
-                        href="https://mcddocs.ptm.tn"
-                        target="_blank"
-                        class="ecosystem-link"
-                    >
-                        Technical Documentation
-                    </a>
-
-
-                    <a
-                        href="https://pypi.org/project/medical-image-std/"
-                        target="_blank"
-                        class="ecosystem-link"
-                    >
-                        medical-image-std
-                    </a>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- ================================================================
-     OPEN SOURCE
-================================================================ -->
-
-<section
-    class="opensource"
-    id="opensource"
->
-
-    <div class="container">
-
-        <div class="center animate">
-
-            <span class="section-label">
-                Developer Ecosystem
-            </span>
-
-
-            <h2 class="section-title">
-
-                Open Source & Engineering Tools
-
-            </h2>
-
-
-            <p class="section-description center">
-
-                PTM develops reusable software components
-                and developer tools that support medical
-                imaging research and engineering.
-
-            </p>
-
-        </div>
-
-
-        <div class="opensource-grid">
-
-
-            <a
-                href="https://pypi.org/project/medical-image-std/"
-                target="_blank"
-                class="opensource-card animate"
-            >
-
-                <h3>
-                    medical-image-std
-                </h3>
-
-                <p>
-
-                    Python tools for standardized medical
-                    image processing and research workflows.
-
-                </p>
-
-            </a>
-
-
-            <a
-                href="https://github.com/LATIS-medical-Imaging/medical-image-std"
-                target="_blank"
-                class="opensource-card animate"
-            >
-
-                <h3>
-                    medical-image-std on GitHub
-                </h3>
-
-                <p>
-
-                    Source code, development history and
-                    documentation for the medical imaging
-                    standardization library.
-
-                </p>
-
-            </a>
-
-
-            <a
-                href="https://plugins.jetbrains.com/plugin/31122-dicom-viewer"
-                target="_blank"
-                class="opensource-card animate"
-            >
-
-                <h3>
-                    DICOM Viewer Plugin
-                </h3>
-
-                <p>
-
-                    JetBrains IDE plugin enabling developers
-                    to inspect DICOM medical images directly
-                    within their development environment.
-
-                </p>
-
-            </a>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- ================================================================
-     PUBLICATIONS
-================================================================ -->
-
-<section
-    class="publications"
-    id="publications"
->
-
-    <div class="container">
-
-        <div class="center animate">
-
-            <span class="section-label">
-                Scientific Foundation
-            </span>
-
-
-            <h2 class="section-title">
-
-                Peer-Reviewed Research
-
-            </h2>
-
-
-            <p class="section-description center">
-
-                The PTM research program is supported by
-                peer-reviewed work in medical imaging
-                and computer vision.
-
-            </p>
-
-        </div>
-
-
-        <div class="publication-list">
-
-
-            <a
-                href="https://ieeexplore.ieee.org/abstract/document/11232287"
-                target="_blank"
-                class="publication animate"
-            >
-
-                <div class="publication-index">
-                    01
-                </div>
-
-                <span>
-                    IEEE — Microcalcification Detection Research (2024)
-                </span>
-
-            </a>
-
-
-            <a
-                href="https://link.springer.com/article/10.1007/s10278-022-00678-9"
-                target="_blank"
-                class="publication animate"
-            >
-
-                <div class="publication-index">
-                    02
-                </div>
-
-                <span>
-                    Springer — Journal of Digital Imaging (2022)
-                </span>
-
-            </a>
-
-
-            <a
-                href="https://ieeexplore.ieee.org/abstract/document/9288012"
-                target="_blank"
-                class="publication animate"
-            >
-
-                <div class="publication-index">
-                    03
-                </div>
-
-                <span>
-                    IEEE — Mammography Image Analysis (2020)
-                </span>
-
-            </a>
-
-
-            <a
-                href="https://link.springer.com/article/10.1007/s10044-018-0760-x"
-                target="_blank"
-                class="publication animate"
-            >
-
-                <div class="publication-index">
-                    04
-                </div>
-
-                <span>
-                    Springer — Pattern Analysis and Applications (2018)
-                </span>
-
-            </a>
-
-
-            <a
-                href="https://www.sciencedirect.com/science/article/abs/pii/S0208521620300607"
-                target="_blank"
-                class="publication animate"
-            >
-
-                <div class="publication-index">
-                    05
-                </div>
-
-                <span>
-                    Biomedical Signal Processing and Control — Medical Imaging Research (2020)
-                </span>
-
-            </a>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- ================================================================
-     COLLABORATION
-================================================================ -->
-
-<section
-    class="collaboration"
-    id="collaborate"
->
-
-    <div class="container">
-
-        <span
-            class="section-label"
-            style="color:white;"
-        >
-            Collaborate with PTM
-        </span>
-
-
-        <h2
-            class="section-title"
-            style="color:white;"
-        >
-
-            Building Medical AI
-            Through Collaboration.
-
-        </h2>
-
-
-        <p>
-
-            PTM is open to collaboration with universities,
-            hospitals, medical imaging researchers,
-            AI organizations, infrastructure providers
-            and industry partners.
-
+        <span class="section-label">Collaborate with PTM</span>
+        <h2 class="section-title">Build the next stage with us.</h2>
+        <p class="section-description">
+            We are looking for academic, clinical and industry partners to validate, scale and
+            deploy medical imaging AI.
         </p>
 
-
-        <div class="collaboration-grid">
-
-            <div class="collaboration-item">
-
-                Medical AI Research
-
+        <div class="partner-grid">
+            <div class="partner animate">
+                <h3>Research collaborators</h3>
+                <div class="for">Universities, hospitals, radiologists</div>
+                <ul>
+                    <li>Joint R&amp;D projects and studies</li>
+                    <li>Clinical validation of detection models</li>
+                    <li>Annotated mammography datasets</li>
+                </ul>
             </div>
 
-
-            <div class="collaboration-item">
-
-                Clinical Validation
-
+            <div class="partner animate">
+                <h3>Infrastructure sponsors</h3>
+                <div class="for">Cloud, GPU and compute providers</div>
+                <ul>
+                    <li>GPU compute for training and benchmarking</li>
+                    <li>Production hosting for the medical SaaS</li>
+                    <li>Visible credit across the platform and releases</li>
+                </ul>
             </div>
 
-
-            <div class="collaboration-item">
-
-                Medical Imaging Data
-
+            <div class="partner animate">
+                <h3>Open-source ecosystems</h3>
+                <div class="for">Medical imaging frameworks and communities</div>
+                <ul>
+                    <li>Integration of our models and tools</li>
+                    <li>Shared, reproducible benchmarks</li>
+                    <li>Co-maintained open tooling</li>
+                </ul>
             </div>
-
-
-            <div class="collaboration-item">
-
-                GPU & Compute Infrastructure
-
-            </div>
-
-
-            <div class="collaboration-item">
-
-                Technology Partnerships
-
-            </div>
-
-
-            <div class="collaboration-item">
-
-                Open Source Research
-
-            </div>
-
         </div>
 
-
-        <div
-            style="
-                display:flex;
-                gap:1rem;
-                flex-wrap:wrap;
-            "
-        >
-
-            <a
-                href="https://forms.gle/yiwMn2wY9i9Hf4Zg8"
-                target="_blank"
-                class="btn"
-                style="
-                    background:white;
-                    color:#c2185b;
-                "
-            >
-                Start a Collaboration
-            </a>
-
-
-            <a
-                href="mailto:contact@ptm.tn"
-                class="btn btn-outline"
-            >
-                Contact the Team
-            </a>
-
+        <div class="cta-row">
+            <a href="https://forms.gle/yiwMn2wY9i9Hf4Zg8" target="_blank" rel="noopener" class="btn btn-white btn-lg">Start a collaboration <span class="arrow">→</span></a>
+<!--            <a href="mailto:contact@ptm.tn" class="btn btn-ghost-white btn-lg">contact@ptm.tn</a>-->
         </div>
-
     </div>
-
 </section>
 
-
-<!-- ================================================================
-     FOOTER
-================================================================ -->
-
+<!-- ================= FOOTER ================= -->
 <footer>
+    <div class="footer-grid">
+        <div>
+            <div class="footer-brand">
+                <img src="logo.png" alt="PTM logo">
+                <b>PTM — Medical AI Platform</b>
+            </div>
+            <p>
+                Developed within
+                <a href="https://latis-eniso.tn/public/" target="_blank" rel="noopener">LATIS — Sousse University</a>.
+                Medical imaging AI software; not yet a certified medical device.
+            </p>
+        </div>
 
-    <p>
+        <div>
+            <h4>Platform</h4>
+            <ul>
+                <li><a href="https://mcd.ptm.tn/" target="_blank" rel="noopener">MammoDetect AI</a></li>
+                <li><a href="https://mcddocs.ptm.tn/" target="_blank" rel="noopener">Documentation</a></li>
+                <li><a href="#publications">Publications</a></li>
+            </ul>
+        </div>
 
-        © 2026 PTM — Medical AI Research Platform
+        <div>
+            <h4>Open source</h4>
+            <ul>
+                <li><a href="https://github.com/LATIS-medical-Imaging/medical-image-std" target="_blank" rel="noopener">GitHub</a></li>
+                <li><a href="https://pypi.org/project/medical-image-std/" target="_blank" rel="noopener">PyPI</a></li>
+                <li><a href="https://plugins.jetbrains.com/plugin/31122-dicom-viewer" target="_blank" rel="noopener">JetBrains DICOM Viewer</a></li>
+            </ul>
+        </div>
+    </div>
 
-    </p>
-
-
-    <p
-        style="
-            margin-top:0.5rem;
-        "
-    >
-
-        Developed within
-
-        <a
-            href="https://latis-eniso.tn/public/"
-            target="_blank"
-        >
-            LATIS — Sousse University
-        </a>
-
-    </p>
-
-
-    <p
-        style="
-            margin-top:0.5rem;
-            font-size:0.75rem;
-        "
-    >
-
-        Research · Engineering · Medical Imaging · Artificial Intelligence
-
-    </p>
-
+    <div class="footer-bottom">
+        <span>© 2026 PTM — Medical AI Platform</span>
+        <span>Research · Engineering · Industry · Medical AI</span>
+    </div>
 </footer>
 
-
-<!-- ================================================================
-     SCROLL ANIMATION
-================================================================ -->
-
 <script>
+    // Reveal-on-scroll
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add("visible");
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.12 });
+    document.querySelectorAll(".animate").forEach((el) => observer.observe(el));
 
-    const observer = new IntersectionObserver(
-
-        (entries) => {
-
-            entries.forEach((entry) => {
-
-                if (entry.isIntersecting) {
-
-                    entry.target.classList.add(
-                        "visible"
-                    );
-
-                    observer.unobserve(
-                        entry.target
-                    );
-                }
-
-            });
-
-        },
-
-        {
-            threshold: 0.12
-        }
-
-    );
-
-
-    document
-
-        .querySelectorAll(
-            ".animate"
-        )
-
-        .forEach(
-
-            (element) =>
-
-                observer.observe(
-                    element
-                )
-
-        );
-
+    // Copy pip command
+    document.querySelectorAll(".copy-btn").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+            try {
+                await navigator.clipboard.writeText(btn.dataset.copy);
+                btn.textContent = "Copied";
+                setTimeout(() => (btn.textContent = "Copy"), 1600);
+            } catch (e) { /* clipboard unavailable — ignore */ }
+        });
+    });
 </script>
-
 
 </body>
 </html>
